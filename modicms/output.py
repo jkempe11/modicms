@@ -32,7 +32,7 @@ class _LocalTerminalComponent(_Component):
         try:
             absolute = self._absolute(metadata)
             target_mtime = os.path.getmtime(absolute)
-            return target_mtime < source_mtime
+            return (target_mtime - source_mtime) < -.1
         except OSError:
             return True
 
