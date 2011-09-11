@@ -1,6 +1,8 @@
+import re
 import os
 import json
 import urllib
+import cStringIO
 
 from modicms.base import _Component
 
@@ -55,6 +57,24 @@ try:
 
 except ImportError:
     pass
+
+class IncludeJavascript(_MarkupComponent):
+    output_extension = '.js'
+    INCLUDE_RE = re.compile(r'#include\s*"([^"]+)"\s*')
+
+    def _process(self, metadata, data):
+        output = cStringIO.StringIO()
+
+        for line in data.splitlines():
+            m = self.INCLUDE_RE.match(line)
+            if m:
+                filename = m.group(1)
+                with open(filename, 'r') as included:
+                    output.write(included.read())
+            else:
+                output.write(line + "\n")
+
+        return output.getvalue()
 
 
 class CompressJavascript(_MarkupComponent):
