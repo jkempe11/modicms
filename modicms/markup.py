@@ -1,4 +1,5 @@
 import os
+import json
 import urllib
 
 from modicms.base import _Component
@@ -60,16 +61,24 @@ class CompressJavascript(_MarkupComponent):
     output_extension = '.js'
 
     def _process(self, metadata, data):
-        params = urllib.urlencode({
-            'js_code': data,
-            'compilation_level': 'SIMPLE_OPTIMIZATIONS',
-            'output_format': 'text',
-            'output_info': 'compiled_code',
-        })
+        params = urllib.urlencode([
+            ('js_code', data),
+            ('compilation_level', 'SIMPLE_OPTIMIZATIONS'),
+            ('output_format', 'json'),
+            ('output_info', 'compiled_code'),
+            ('output_info', 'errors'),
+        ])
 
         resp = urllib.urlopen(
             'http://closure-compiler.appspot.com/compile',
             params
         )
 
-        return resp.read()
+        response = json.loads(resp.read())
+
+        if 'errors' in response:
+            for error in response['errors']:
+                print error['error']
+            raise Exception("failed to closure-compile javascript")
+
+        return response['compiledCode']
