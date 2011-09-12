@@ -61,7 +61,8 @@ try:
     mimetypes.types_map.setdefault('.woff', 'application/x-woff')
 
     class _S3TerminalComponent(_Component):
-        def __init__(self, bucket):
+        def __init__(self, bucket, extra_headers={}):
+            self.extra_headers = extra_headers
             self.connection = boto.connect_s3()
             self.bucket = self.connection.get_bucket(bucket)
             super(_Component, self).__init__()
@@ -75,6 +76,9 @@ try:
             headers = {
                 'Content-Type': type,
             }
+            if 'was_gzipped' in metadata:
+                headers['Content-Encoding'] = 'gzip'
+            headers.update(self.extra_headers)
 
             print >>sys.stderr, metadata['output_path']
             self._process(key, headers, metadata, data)

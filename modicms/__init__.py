@@ -11,4 +11,5 @@ from modicms.metadata import *
 from modicms.accumulators import *
 from modicms.markup import *
 from modicms.templating import *
+from modicms.transforms import *
 from modicms.output import *
